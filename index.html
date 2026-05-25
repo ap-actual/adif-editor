@@ -922,7 +922,7 @@ async function fetchCallsignData(callsign) {
   const nameInput = modalBody.querySelector('[name="NAME"]');
   const qthInput = modalBody.querySelector('[name="QTH"]');
   const stateInput = modalBody.querySelector('[name="STATE"]');
-  const gridInput = modalBody.querySelector('[name="GRIDSQUARE"]');
+  const gridInput = modalBody.querySelector('[name="GRIDSQUARE"]'); // Fixed name
   const countryInput = modalBody.querySelector('[name="COUNTRY"]');
   const continentSelect = modalBody.querySelector('[name="CONT"]');
 
@@ -940,7 +940,6 @@ async function fetchCallsignData(callsign) {
       }
 
       // 2. Populate QTH (City) and STATE from data.address
-      // Callook provides data.address.city and data.address.state directly
       if (qthInput && !qthInput.value && data.address?.city) {
         qthInput.value = data.address.city;
       }
@@ -953,12 +952,12 @@ async function fetchCallsignData(callsign) {
         gridInput.value = data.location.grid;
       }
 
-      // 4. Populate Country (Since Callook is US-only, this is static)
+      // 4. Populate Country
       if (countryInput && !countryInput.value) {
         countryInput.value = 'United States';
       }
 
-      // 5. Populate Continent dropdown (Selects 'NA' for North America)
+      // 5. Populate Continent dropdown
       if (continentSelect && !continentSelect.value) {
         continentSelect.value = 'NA';
       }

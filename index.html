@@ -690,23 +690,44 @@ async function fetchCallsignData(callsign) {
     const data = await response.json();
 
     if (data.status === 'VALID') {
-      if (nameInput && !nameInput.value && data.name) {
+      // Clean up the name format "DOE, JOHN M" -> "John M Doe"
+      if (nameInput && data.name) {
         const nameParts = data.name.split(',').map(p => p.trim());
-        nameInput.value = nameParts.length > 1 ? `${nameParts[1]} ${nameParts[0]}` : data.name;
+        const formattedName = nameParts.length > 1 ? `${nameParts[1]} ${nameParts[0]}` : data.name;
+        // Only skip if the user typed something completely custom
+        if (!nameInput.value || nameInput.value.trim() === '') {
+          nameInput.value = formattedName;
+        }
       }
-      if (qthInput && !qthInput.value && data.address?.city) {
-        qthInput.value = data.address.city;
+
+      // Populate QTH / City
+      if (qthInput && data.address?.city) {
+        if (!qthInput.value || qthInput.value.trim() === '') {
+          qthInput.value = data.address.city;
+        }
       }
-      if (stateInput && !stateInput.value && data.address?.state) {
-        stateInput.value = data.address.state;
+
+      // Populate State
+      if (stateInput && data.address?.state) {
+        if (!stateInput.value || stateInput.value.trim() === '') {
+          stateInput.value = data.address.state;
+        }
       }
-      if (gridInput && !gridInput.value && data.location?.grid) {
-        gridInput.value = data.location.grid;
+
+      // Populate Grid Square
+      if (gridInput && data.location?.grid) {
+        if (!gridInput.value || gridInput.value.trim() === '') {
+          gridInput.value = data.location.grid;
+        }
       }
-      if (countryInput && !countryInput.value) {
+
+      // Populate Country (Static assignment for Callook)
+      if (countryInput && (!countryInput.value || countryInput.value.trim() === '')) {
         countryInput.value = 'United States';
       }
-      if (continentSelect && !continentSelect.value) {
+
+      // Populate Continent Dropdown
+      if (continentSelect && (!continentSelect.value || continentSelect.value.trim() === '')) {
         continentSelect.value = 'NA';
       }
 

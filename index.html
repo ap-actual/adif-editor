@@ -690,43 +690,42 @@ async function fetchCallsignData(callsign) {
     const data = await response.json();
 
     if (data.status === 'VALID') {
-      // Clean up the name format "DOE, JOHN M" -> "John M Doe"
-      if (nameInput && data.name) {
+      // 1. Format Name cleanly: "DOE, JOHN M" -> "John M Doe"
+      if (nameInput && data.name && (!nameInput.value || nameInput.value.trim() === '')) {
         const nameParts = data.name.split(',').map(p => p.trim());
-        const formattedName = nameParts.length > 1 ? `${nameParts[1]} ${nameParts[0]}` : data.name;
-        // Only skip if the user typed something completely custom
-        if (!nameInput.value || nameInput.value.trim() === '') {
-          nameInput.value = formattedName;
+        nameInput.value = nameParts.length > 1 ? `${nameParts[1]} ${nameParts[0]}` : data.name;
+      }
+
+      // 2. Parse City and State out of data.address.line2 ("CITY, ST ZIP")
+      if (data.address?.line2) {
+        // Regex matches everything before the comma as City, and the two letters after as State
+        const addressRegex = /^([^,]+),\s*([A-Z]{2})\s+\d/;
+        const match = data.address.line2.match(addressRegex);
+        
+        if (match) {
+          const city = match[1].trim();
+          const state = match[2].trim();
+
+          if (qthInput && (!qthInput.value || qthInput.value.trim() === '')) {
+            qthInput.value = city;
+          }
+          if (stateInput && (!stateInput.value || stateInput.value.trim() === '')) {
+            stateInput.value = state;
+          }
         }
       }
 
-      // Populate QTH / City
-      if (qthInput && data.address?.city) {
-        if (!qthInput.value || qthInput.value.trim() === '') {
-          qthInput.value = data.address.city;
-        }
+      // 3. Populate Grid Square (Callook property is explicitly "gridsquare")
+      if (gridInput && data.location?.gridsquare && (!gridInput.value || gridInput.value.trim() === '')) {
+        gridInput.value = data.location.gridsquare;
       }
 
-      // Populate State
-      if (stateInput && data.address?.state) {
-        if (!stateInput.value || stateInput.value.trim() === '') {
-          stateInput.value = data.address.state;
-        }
-      }
-
-      // Populate Grid Square
-      if (gridInput && data.location?.grid) {
-        if (!gridInput.value || gridInput.value.trim() === '') {
-          gridInput.value = data.location.grid;
-        }
-      }
-
-      // Populate Country (Static assignment for Callook)
+      // 4. Populate Country
       if (countryInput && (!countryInput.value || countryInput.value.trim() === '')) {
         countryInput.value = 'United States';
       }
 
-      // Populate Continent Dropdown
+      // 5. Populate Continent
       if (continentSelect && (!continentSelect.value || continentSelect.value.trim() === '')) {
         continentSelect.value = 'NA';
       }
